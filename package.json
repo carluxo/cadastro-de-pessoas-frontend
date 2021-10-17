@@ -5,7 +5,7 @@
   "author": "wc-studies",
   "license": "MIT",
   "scripts": {
-    "start": "web-dev-server --node-resolve --app-index ./index.html --open"
+    "start": "web-dev-server --node-resolve --port 5000 --app-index ./index.html --open"
   },
   "dependencies": {
     "lit-element": "^2.5.1",

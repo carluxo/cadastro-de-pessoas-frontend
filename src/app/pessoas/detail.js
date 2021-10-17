@@ -45,7 +45,7 @@ class Detail extends StyledComponent {
     _alterarDataDeNascimento(value) {
         try {
             this.item.nascimento = new Date(value).toISOString();
-        } catch(e) {
+        } catch (e) {
             this.item.nascimento = '';
         } finally {
             this.error.nascimento = null
@@ -56,14 +56,14 @@ class Detail extends StyledComponent {
         let opcoes = [];
 
         if (this.item.genero) {
-            opcoes.push(html`<option ?selected=${this.item.genero === "MASCULINO" } value="MASCULINO">Masculino</option>`);
-            opcoes.push(html`<option ?selected=${this.item.genero ==="FEMININO" } value="FEMININO">Feminino</option>`);
+            opcoes.push(html`<option ?selected=${this.item.genero==="MASCULINO"} value="MASCULINO">Masculino</option>`);
+            opcoes.push(html`<option ?selected=${this.item.genero=== "FEMININO"} value="FEMININO">Feminino</option>`);
         } else {
             opcoes.push(html`<option selected disabled hidden value="NAO_INFORMADO">Não informado</option>`);
             opcoes.push(html`<option value="MASCULINO">Masculino</option>`);
             opcoes.push(html`<option value="FEMININO">Feminino</option>`);
         }
-        
+
         return opcoes;
     }
 
@@ -103,24 +103,26 @@ class Detail extends StyledComponent {
         return Object.keys(errors).length == 0;
     }
 
+    _tratarMensagensDeErro(e) {
+        if (e.message.includes('violations')) {
+            this.error = JSON.parse(e.message).violations
+        } else {
+            this.message = `Erro na gravação do registro:\n${e.message}`;
+        }
+    }
+
     _validarEGravar() {
-        try {
-            if (this._validar()) {
-                if (this.item.id) {
-                    pessoaService.patch(this.item).then(response => 
-                        this.dispatchEvent(new CustomEvent('on-save', { detail: response }))
-                    );
-                } else {
-                    pessoaService.post(this.item).then(response =>
-                        this.dispatchEvent(new CustomEvent('on-create', { detail: response }))
-                    );
-                }
-            }
-        } catch (e) {
-            if (e.message.contains('error:')) {
-                this.error = json.parse(e.message)
+        this.message = null;
+
+        if (this._validar()) {
+            if (this.item.id) {
+                pessoaService.patch(this.item).then(response =>
+                    this.dispatchEvent(new CustomEvent('on-save', { detail: response }))
+                ).catch(this._tratarMensagensDeErro);
             } else {
-                this.message = `Erro na gravação do registro:\n${e.message}`;
+                pessoaService.post(this.item).then(response =>
+                    this.dispatchEvent(new CustomEvent('on-create', { detail: response }))
+                ).catch(this._tratarMensagensDeErro);
             }
         }
     }
@@ -154,8 +156,8 @@ class Detail extends StyledComponent {
                                 <div class="field">
                                     <div class="control">
                                         <input class="input ${classMap({ 'is-danger': this.error.nome })}}" type="text" name="nome"
-                                            value=${this.item.nome ? this.item.nome : ''} 
-                                            @change=${e => this._changeItemPropertyAndError('nome', e.target.value)}}>
+                                            value=${this.item.nome ? this.item.nome : '' } @change=${e=>
+                                        this._changeItemPropertyAndError('nome', e.target.value)}}>
                                         <p class="help is-danger">${this.error.nome}</p>
                                     </div>
                                 </div>
@@ -169,7 +171,7 @@ class Detail extends StyledComponent {
                                 <div class="field">
                                     <div class="control">
                                         <div class="select">
-                                            <select @change=${e => this._changeItemProperty('genero', e.target.value)}>
+                                            <select @change=${e=> this._changeItemProperty('genero', e.target.value)}>
                                                 ${this._renderizarOpcoesDeGenero()}
                                             </select>
                                         </div>
@@ -185,8 +187,8 @@ class Detail extends StyledComponent {
                                 <div class="field">
                                     <div class="control">
                                         <input class="input ${classMap({ 'is-danger': this.error.email })}}" type="email"
-                                            name="email" value=${this.item.email ? this.item.email : ''} @change=${e =>
-                this._changeItemPropertyAndError('email', e.target.value)}>
+                                            name="email" value=${this.item.email ? this.item.email : '' } @change=${e=>
+                                        this._changeItemPropertyAndError('email', e.target.value)}>
                                         <p class="help is-danger">${this.error.email}</p>
                                     </div>
                                 </div>
@@ -201,8 +203,8 @@ class Detail extends StyledComponent {
                                     <div class="field">
                                         <div class="control">
                                             <input class="input ${classMap({ 'is-danger': this.error.cpf })}}" type="text"
-                                                name="cpf" value=${this.item.cpf ? this.item.cpf : ''} @change=${e =>
-                                            this._changeItemPropertyAndError('cpf', e.target.value)}>
+                                                name="cpf" value=${this.item.cpf ? this.item.cpf : '' } @change=${e=>
+                this._changeItemPropertyAndError('cpf', e.target.value)}>
                                             <p class="help is-danger">${this.error.cpf}</p>
                                         </div>
                                     </div>
@@ -217,8 +219,8 @@ class Detail extends StyledComponent {
                                 <div class="field">
                                     <div class="control">
                                         <input class="input ${classMap({ 'is-danger': this.error.nascimento })}}" type="date"
-                                            name="nascimento" .value=${this.item.nascimento ? this.item.nascimento.substring(0, 10) : ''} 
-                                            @change=${e => this._alterarDataDeNascimento(e.target.value)}>
+                                            name="nascimento" .value=${this.item.nascimento ? this.item.nascimento.substring(0, 10)
+                                            : '' } @change=${e=> this._alterarDataDeNascimento(e.target.value)}>
                                         <p class="help is-danger">${this.error.nascimento}</p>
                                     </div>
                                 </div>
@@ -232,8 +234,8 @@ class Detail extends StyledComponent {
                                 <div class="field">
                                     <div class="control">
                                         <input class="input" type="text" name="naturalidade" value=${this.item.naturalidade ?
-                this.item.naturalidade : ''} @change=${e => this._changeItemProperty('naturalidade',
-                    e.target.value)}>
+                                            this.item.naturalidade : '' } @change=${e=> this._changeItemProperty('naturalidade',
+                                        e.target.value)}>
                                     </div>
                                 </div>
                             </div>
@@ -246,8 +248,8 @@ class Detail extends StyledComponent {
                                 <div class="field">
                                     <div class="control">
                                         <input class="input" type="text" name="nacionalidade" value=${this.item.nacionalidade ?
-                this.item.nacionalidade : ''} @change=${e => this._changeItemProperty('nacionalidade',
-                    e.target.value)}>
+                                            this.item.nacionalidade : '' } @change=${e=> this._changeItemProperty('nacionalidade',
+                                        e.target.value)}>
                                     </div>
                                 </div>
                             </div>

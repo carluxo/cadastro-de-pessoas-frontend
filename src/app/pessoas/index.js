@@ -49,12 +49,13 @@ class Index extends StyledComponent {
     _renderizarItens() {
         return this.items.map(item => {
             let data = item.nascimento.substring(0, 10).split('-');
+            let genero =item.genero ? item.genero[0] + item.genero.substring(1, item.genero.length).toLowerCase() : "Não informado";
             return html`
                 <tr>
                     <td>${item.cpf}</td>
                     <td>${item.nome}</td>
                     <td>${data[2] + '/' + data[1] + '/' + data[0]}</td>
-                    <td>${item.genero}</td>
+                    <td>${genero}</td>
                     <td>
                         <a class="button is-small is-ghost" @click=${(e) => this._selecionarItem(item)}>Editar</a>
                         <a class="button is-small is-ghost has-text-danger" @click=${(e) => this._confirmarExclusao(item)} >Excluir</a>
